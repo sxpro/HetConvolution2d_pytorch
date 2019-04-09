@@ -14,20 +14,21 @@ class HetConv2d(nn.Module):
 
     def make_HetConv2d(self, n, p):
         layers = nn.ModuleList()
-        for i in range(self.in_feats//self.groups):
-            if ((i - n) % (p)) == 0:
-                layers.append(nn.Conv2d(self.groups, 1, 3, 1, 1))
+        for i in range(self.groups):
+            if (((i - n) % (p))) % self.groups == 0:
+                layers.append(nn.Conv2d(self.in_feats//self.groups, 1, 3, 1, 1))
 
             else:
-                layers.append(nn.Conv2d(self.groups, 1, 1, 1, 0))
+                layers.append(nn.Conv2d(self.in_feats//self.groups, 1, 1, 1, 0))
         return layers
 
     def forward(self, x):
         out = []
         for i in range(0, self.out_feats):
-            out_ = self.blocks[i][0](x[:, 0: self.groups, :, :])
-            for j in range(1, self.in_feats//self.groups):
-               out_ += self.blocks[i][j](x[:, j*self.groups:(j + 1)*self.groups, :, :])
+            out_ = self.blocks[i][0](x[:, 0: self.in_feats//self.groups, :, :])
+            for j in range(1, self.groups):
+               out_ += self.blocks[i][j](x[:, j*self.in_feats//self.groups:(j + 1)*self.in_feats//self.groups, :, :])
             out.append(out_)
         return torch.cat(out, 1)
+
 
