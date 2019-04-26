@@ -46,8 +46,8 @@ class HetConv2d_v2(nn.Module):
 
     def make_HetConv2d(self, p):
         layers = nn.ModuleList()
-        layers.append(nn.Conv2d(self.in_feats//p, self.in_feats//p, 3, 1, 1, groups=self.in_feats//p))
-        layers.append(nn.Conv2d(self.in_feats-self.in_feats//p, self.in_feats-self.in_feats//p, 1, 1, 0, groups=self.in_feats-self.in_feats//p))
+        layers.append(nn.Conv2d(self.in_feats//p, 1, 3, 1, 1))
+        layers.append(nn.Conv2d(self.in_feats-self.in_feats//p, 1, 1, 1, 0))
         return layers
 
     def forward(self, x):
@@ -68,7 +68,7 @@ class HetConv2d_v2(nn.Module):
                         out1x1 = torch.cat((out1x1, x[:, j:j + 1, :, :]), 1)
             out3x3 = self.blocks[i][0](out3x3)
             out1x1 = self.blocks[i][1](out1x1)
-            out_ = out1x1.sum(dim=1, keepdim=True) + out3x3.sum(dim=1, keepdim=True)
+            out_ = out1x1 + out3x3
             out.append(out_)
         return torch.cat(out, 1)
 
