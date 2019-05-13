@@ -72,17 +72,16 @@ class HetConv2d_v2(nn.Module):
             out.append(out_)
         return torch.cat(out, 1)
 
-class Efficient_HetConv(nn.Module):
-
+class Efficient_HetConv2d(nn.Module):
     def __init__(self, in_feats, out_feats, p=4):
-        super(Efficient_HetConv, self).__init__()
+        super(Efficient_HetConv2d, self).__init__()
         if in_feats % p != 0:
-            raise ValueError('in_channels must be divisible by groups')
-
+            raise ValueError('in_channels must be divisible by p')
+        if out_feats % p != 0:
+            raise ValueError('out_channels must be divisible by p')
         self.conv3x3 = nn.Conv2d(in_feats, out_feats, kernel_size=3, padding=1, groups=p)
         self.conv1x1_ = nn.Conv2d(in_feats, out_feats, kernel_size=1, groups=p)
         self.conv1x1 = nn.Conv2d(in_feats, out_feats, kernel_size=1)
 
     def forward(self, x):
         return self.conv3x3(x) + self.conv1x1(x) - self.conv1x1_(x)
-
